@@ -24,6 +24,24 @@ pub struct ClaimChallenged {
     pub stake: i128,
 }
 
+/// A fixed-odds challenge consumed part of the creator's liquidity guarantee.
+/// `reserved_creator_liability` and `available_creator_liquidity` are snapshots
+/// after this challenge, so an indexer can audit the limit without replaying
+/// the roster or trusting a stale read-index calculation.
+#[contractevent]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct FixedOddsLiquidityReserved {
+    #[topic]
+    pub id: u64,
+    #[topic]
+    pub challenger: Address,
+    pub stake: i128,
+    pub gross: i128,
+    pub profit: i128,
+    pub reserved_creator_liability: i128,
+    pub available_creator_liquidity: i128,
+}
+
 #[contractevent]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ClaimResolved {
