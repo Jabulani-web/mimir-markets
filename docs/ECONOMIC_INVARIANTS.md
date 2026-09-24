@@ -63,6 +63,26 @@ payouts + fees + dust equals escrow inflow. Alongside it:
 - `draw_refunds_everyone_in_full_with_no_fee` and the `Unresolvable` equivalent
 - `a_quote_matches_what_the_pull_actually_pays`
 
+### Fixed-odds liquidity is a claim-level accounting invariant
+
+A fixed-odds challenge reserves only the challenger's **profit**, because the
+challenger's principal is already held in escrow and is returned on every
+outcome. The contract computes the same integer profit as `gross_payout` at
+challenge time, rejects a challenge when it exceeds the creator's unreserved
+stake, and stores the cumulative reservation on the claim. A failed check runs
+before the token pull and leaves claim state, escrow, and participant balances
+unchanged. Exact-capacity and exhausted-capacity cases are covered by
+`fixed_odds_rejects_challenge_creator_cannot_cover`; corrupt reservations fail
+closed via `fixed_odds_rejects_corrupt_reserved_liability_without_underflowing`.
+
+At resolution, the reserved profit is paid to winning challengers, while the
+creator receives the unreserved remainder. The `FixedOddsLiquidityReserved`
+event records the post-challenge reservation and remaining liquidity, making the
+limit auditable from ledger events without trusting a read-index. The
+`checked_*` arithmetic used for inflow, committed payout, and claim counters
+also prevents malformed persisted state from wrapping into an apparently valid
+settlement.
+
 The off-chain mirror exports `conservationHolds` and `noWinnerLosesPrincipal` from
 `lib/fees.ts` and asserts them over the same shapes.
 
